@@ -11,9 +11,8 @@ func NewParser(collector *Collector) Parser {
 
 	return Parser{
 		collector: collector,
-		buffer:    bytes.Buffer{},
-		url:       url,
-		number:    number,
+		url:       &url,
+		number:    &number,
 		target:    &url,
 		newLine:   false,
 	}
@@ -21,27 +20,24 @@ func NewParser(collector *Collector) Parser {
 
 type Parser struct {
 	collector *Collector
-	buffer    bytes.Buffer
 
-	url     bytes.Buffer
-	number  bytes.Buffer
+	url     *bytes.Buffer
+	number  *bytes.Buffer
 	target  *bytes.Buffer
 	newLine bool
 }
 
 func (p *Parser) submitChunk(bytes []byte, readBytes int) {
-	p.buffer.WriteString(string(bytes[:readBytes]))
-
 	for i := 0; i < readBytes; i++ {
 		if bytes[i] == ' ' {
-			p.target = &p.number
+			p.target = p.number
 		} else if bytes[i] == '\n' || bytes[i] == '\r' {
 			p.newLine = true
 		} else {
 			if p.newLine {
 				p.parseCortege()
 
-				p.target = &p.url
+				p.target = p.url
 				p.url.Truncate(0)
 				p.number.Truncate(0)
 				p.newLine = false
@@ -52,11 +48,10 @@ func (p *Parser) submitChunk(bytes []byte, readBytes int) {
 	}
 }
 
-func (p *Parser) content() string {
-	return p.buffer.String()
-}
-
 func (p *Parser) parseCortege() {
+	if p.number.Len() == 0 {
+		panic("empty number for url:" + p.url.String())
+	}
 	value, err := strconv.Atoi(p.number.String())
 	if err != nil {
 		panic("parse a value: " + err.Error())
