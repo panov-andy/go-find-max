@@ -15,7 +15,7 @@ func main() {
 	collector := clickhouse.NewCollector(10)
 	parser := clickhouse.NewParser(&collector)
 
-	err := clickhouse.ReadFile(filepath, &parser)
+	err := clickhouse.ReadFile(filepath, parser)
 	if err != nil {
 		panic(err)
 	}
