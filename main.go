@@ -12,10 +12,16 @@ func main() {
 	}
 	filepath := os.Args[1]
 
-	parser := clickhouse.Parser{}
+	collector := clickhouse.NewCollector(2)
+	parser := clickhouse.NewParser(&collector)
+
 	err := clickhouse.ReadFile(filepath, &parser)
 	if err != nil {
 		panic(err)
+	}
+
+	for _, cort := range collector.GetResult() {
+		log.Println(cort.Url)
 	}
 
 }
