@@ -17,7 +17,7 @@ func ReadFile(filepath string, parser *Parser) error {
 		if err != nil {
 			return err
 		}
-		buff := make([]byte, 17)
+		buff := make([]byte, os.Getpagesize())
 		readBytes, err := file.Read(buff)
 		if err != nil {
 			if readBytes == 0 && err == io.EOF {
