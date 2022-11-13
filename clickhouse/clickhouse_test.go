@@ -52,3 +52,29 @@ func Test_sortByRate(t *testing.T) {
 	assert.Equal(t, "http://api.tech.com/item/122345", c[0].Url)
 	assert.Equal(t, "http://api.tech.com/item/124345", c[1].Url)
 }
+
+func Test_readFile(t *testing.T) {
+	parser := Parser{}
+	err := ReadFile("test_data/sample-data.txt", &parser)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "http://api.tech.com/item/121345 9", parser.content())
+}
+
+func Test_readFile_empty(t *testing.T) {
+	parser := Parser{}
+	err := ReadFile("test_data/empty-file.txt", &parser)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "", parser.content())
+}
+func Test_readFile_two_lines(t *testing.T) {
+	parser := Parser{}
+	err := ReadFile("test_data/sample-data-two-lines.txt", &parser)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "http://api.tech.com/item/121345 9\r\nhttp://api.tech.com/item/121345 912", parser.content())
+}
