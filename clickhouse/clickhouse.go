@@ -12,6 +12,25 @@ type Cortege struct {
 	Rate int
 }
 
+type Collector struct {
+	maxSize  int
+	corteges []Cortege
+}
+
+func (c *Collector) process(cortege Cortege) {
+	arrSize := len(c.corteges)
+
+	if arrSize < c.maxSize {
+		c.corteges = append(c.corteges, cortege)
+	} else {
+		if c.corteges[arrSize-1].Rate < cortege.Rate {
+			c.corteges[arrSize-1] = cortege
+		}
+	}
+
+	sortByRate(c.corteges)
+}
+
 func sortByRate(corteges []Cortege) {
 	sort.SliceStable(corteges, func(i, j int) bool {
 		return corteges[i].Rate > corteges[j].Rate
