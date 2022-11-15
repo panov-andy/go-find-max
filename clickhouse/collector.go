@@ -2,12 +2,22 @@ package clickhouse
 
 import "sync"
 
-func NewCollector(maxSize int) Collector {
-	return Collector{
+func NewCollector(maxSize int) *Collector {
+	collector := Collector{
 		maxSize:  maxSize,
-		corteges: []Cortege{},
+		corteges: make([]Cortege, maxSize),
 		mutex:    sync.Mutex{},
 	}
+
+	cort := Cortege{
+		Url:  "",
+		Rate: -2147483648,
+	}
+	for i := 0; i < maxSize; i++ {
+		collector.corteges[i] = cort
+	}
+
+	return &collector
 }
 
 type Collector struct {
@@ -17,19 +27,20 @@ type Collector struct {
 }
 
 func (c *Collector) process(cortege *Cortege) {
-	c.mutex.Lock()
-
-	arrSize := len(c.corteges)
-
-	if arrSize < c.maxSize {
-		c.corteges = append(c.corteges, *cortege)
-	} else {
-		if c.corteges[arrSize-1].Rate < cortege.Rate {
-			c.corteges[arrSize-1] = *cortege
+	minIndex := 0
+	min := c.corteges[0].Rate
+	//might be avoided
+	for i := 1; i < c.maxSize; i++ {
+		current := c.corteges[i].Rate
+		if current < min {
+			minIndex = i
+			min = current
 		}
 	}
-	sortByRate(c.corteges)
-	c.mutex.Unlock()
+
+	if cortege.Rate > min {
+		c.corteges[minIndex] = *cortege
+	}
 }
 
 func (c *Collector) GetResult() []Cortege {

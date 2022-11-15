@@ -13,7 +13,7 @@ func main() {
 	filepath := os.Args[1]
 
 	collector := clickhouse.NewCollector(10)
-	parser := clickhouse.NewParser(&collector)
+	parser := clickhouse.NewParser(collector)
 
 	err := clickhouse.ReadFile(filepath, parser)
 	if err != nil {

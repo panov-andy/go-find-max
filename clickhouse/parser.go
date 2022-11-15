@@ -63,10 +63,6 @@ func (p *Parser) parseCortege() {
 		panic("parse a value: " + err.Error())
 	}
 	cortege := Cortege{Url: p.url.String(), Rate: value}
-	p.Wg.Add(1)
-	go func() {
-		p.collector.process(&cortege)
-		p.Wg.Done()
-	}()
+	p.collector.process(&cortege)
 
 }
