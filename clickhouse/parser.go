@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"bytes"
 	"strconv"
+	"sync"
 )
 
 func NewParser(collector *Collector) *Parser {
@@ -14,6 +15,7 @@ func NewParser(collector *Collector) *Parser {
 		url:       url,
 		number:    number,
 		newLine:   false,
+		Wg:        sync.WaitGroup{},
 	}
 	parser.target = &parser.url
 
@@ -27,6 +29,8 @@ type Parser struct {
 	number  bytes.Buffer
 	target  *bytes.Buffer
 	newLine bool
+
+	Wg sync.WaitGroup
 }
 
 func (p *Parser) submitChunk(bytes []byte, readBytes int) {
@@ -58,5 +62,11 @@ func (p *Parser) parseCortege() {
 	if err != nil {
 		panic("parse a value: " + err.Error())
 	}
-	p.collector.process(Cortege{Url: p.url.String(), Rate: value})
+	cortege := Cortege{Url: p.url.String(), Rate: value}
+	p.Wg.Add(1)
+	go func() {
+		p.collector.process(&cortege)
+		p.Wg.Done()
+	}()
+
 }

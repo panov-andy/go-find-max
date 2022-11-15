@@ -20,6 +20,8 @@ func main() {
 		panic(err)
 	}
 
+	parser.Wg.Wait()
+
 	for _, cort := range collector.GetResult() {
 		log.Println(cort.Url)
 	}

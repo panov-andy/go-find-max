@@ -1,29 +1,35 @@
 package clickhouse
 
+import "sync"
+
 func NewCollector(maxSize int) Collector {
 	return Collector{
 		maxSize:  maxSize,
 		corteges: []Cortege{},
+		mutex:    sync.Mutex{},
 	}
 }
 
 type Collector struct {
 	maxSize  int
 	corteges []Cortege
+	mutex    sync.Mutex
 }
 
-func (c *Collector) process(cortege Cortege) {
+func (c *Collector) process(cortege *Cortege) {
+	c.mutex.Lock()
+
 	arrSize := len(c.corteges)
 
 	if arrSize < c.maxSize {
-		c.corteges = append(c.corteges, cortege)
+		c.corteges = append(c.corteges, *cortege)
 	} else {
 		if c.corteges[arrSize-1].Rate < cortege.Rate {
-			c.corteges[arrSize-1] = cortege
+			c.corteges[arrSize-1] = *cortege
 		}
 	}
-
 	sortByRate(c.corteges)
+	c.mutex.Unlock()
 }
 
 func (c *Collector) GetResult() []Cortege {

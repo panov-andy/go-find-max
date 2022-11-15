@@ -37,3 +37,16 @@ func Test_readFile_two_lines(t *testing.T) {
 
 	assert.Equal(t, 2, len(parser.collector.corteges))
 }
+
+//func Test_generate_file(t *testing.T) {
+//	file, err := os.Create("../big-file.txt")
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	defer file.Close()
+//	for i := 0; i <= 10000000; i++ {
+//		fmt.Println(i)
+//		file.WriteString("url" + fmt.Sprint(i) + " " + fmt.Sprint(i) + "\n")
+//	}
+//
+//}
