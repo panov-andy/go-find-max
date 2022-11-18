@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int, error) {
-	result := make([]int, 0)
+func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int64, error) {
+	result := make([]int64, 0)
 	result = append(result, 0)
 
 	stat, err := file.Stat()
@@ -14,23 +14,33 @@ func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int, error) {
 		return nil, err
 	}
 	fileSize := stat.Size()
-	desiredOffset := fileSize / desiredChunks
-	offset := desiredOffset
+	chunkSize := fileSize / desiredChunks
+	offset := chunkSize
 	for {
 		_, err := file.Seek(offset, 0)
 		if err != nil {
 			return nil, err
 		}
-		buff := make([]byte, 8*os.Getpagesize())
-		readBytes, err := file.Read(buff)
+		readBuff := make([]byte, 8*os.Getpagesize())
+		readLen, err := file.Read(readBuff)
 		if err != nil {
-			if readBytes == 0 && err == io.EOF {
-				parser.parseCortege()
+			if readLen == 0 && err == io.EOF {
 				break
 			}
-			return err
+			return nil, err
 		}
-		parser.submitChunk(buff, readBytes)
+
+		newLine := false
+		for i := 0; i < readLen; i++ {
+			if readBuff[i] == '\n' || readBuff[i] == '\r' {
+				newLine = true
+			} else if newLine {
+				newLineOffset := offset + int64(i)
+				result = append(result, newLineOffset)
+				offset = offset + chunkSize
+				break
+			}
+		}
 	}
 
 	return result, nil
