@@ -16,6 +16,6 @@ func TestCollector_process(t *testing.T) {
 
 	collector.process(&Cortege{Url: "url4", Rate: 4})
 
-	assert.Equal(t, collector.corteges[0].Url, "url4")
-	assert.Equal(t, collector.corteges[1].Url, "url3")
+	assert.Equal(t, collector.corteges[0].Url, "url3")
+	assert.Equal(t, collector.corteges[1].Url, "url4")
 }

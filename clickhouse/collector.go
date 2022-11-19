@@ -27,6 +27,11 @@ type Collector struct {
 }
 
 func (c *Collector) process(cortege *Cortege) {
+	if len(c.corteges) < c.maxSize {
+		c.corteges = append(c.corteges, *cortege)
+		return
+	}
+
 	minIndex := 0
 	min := c.corteges[0].Rate
 	//might be avoided

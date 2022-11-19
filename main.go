@@ -4,7 +4,6 @@ import (
 	"github.com/panov-andy/go-find-max/clickhouse"
 	"log"
 	"os"
-	"runtime"
 )
 
 func main() {
@@ -13,12 +12,12 @@ func main() {
 	}
 	filepath := os.Args[1]
 
-	fileInfo, err := os.Stat(filepath)
-	if err != nil {
-		panic(err)
-	}
-	size := fileInfo.Size()
-	runtime.NumCPU()
+	//fileInfo, err := os.Stat(filepath)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//size := fileInfo.Size()
+	//runtime.NumCPU()
 	collector := clickhouse.NewCollector(10)
 	parser := clickhouse.NewParser(collector)
 
