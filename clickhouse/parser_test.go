@@ -30,7 +30,7 @@ func Test_parser2(t *testing.T) {
 func Test_parser3(t *testing.T) {
 	collector := NewCollector(1)
 
-	parser := NewParser(&collector)
+	parser := NewParser(collector)
 	parser.submitChunk([]byte("h"), 1)
 	parser.submitChunk([]byte(" "), 1)
 	parser.submitChunk([]byte("4"), 1)
@@ -43,7 +43,7 @@ func Test_parser3(t *testing.T) {
 
 func Test_parser4(t *testing.T) {
 	collector := NewCollector(1)
-	parser := NewParser(&collector)
+	parser := NewParser(collector)
 	parser.submitChunk([]byte{}, 0)
 	assert.Panics(t, parser.parseCortege)
 }

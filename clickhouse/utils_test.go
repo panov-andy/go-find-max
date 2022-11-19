@@ -7,7 +7,7 @@ import (
 
 func Test_readFile(t *testing.T) {
 	collector := NewCollector(10)
-	parser := NewParser(&collector)
+	parser := NewParser(collector)
 	err := ReadFile("test_data/sample-data.txt", parser)
 	if err != nil {
 		t.Error(err)
@@ -20,14 +20,14 @@ func Test_readFile(t *testing.T) {
 
 func Test_readFile_empty(t *testing.T) {
 	collector := NewCollector(1)
-	parser := NewParser(&collector)
+	parser := NewParser(collector)
 	assert.Panics(t, func() {
 		ReadFile("test_data/empty-file.txt", parser)
 	})
 }
 func Test_readFile_two_lines(t *testing.T) {
 	collector := NewCollector(10)
-	parser := NewParser(&collector)
+	parser := NewParser(collector)
 	err := ReadFile("test_data/sample-data-two-lines.txt", parser)
 	if err != nil {
 		t.Error(err)
