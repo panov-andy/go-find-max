@@ -8,10 +8,11 @@ import (
 
 func TestFindOffsetAfterNewLine(t *testing.T) {
 	str := `http://api.tech.com/item/121345 9
+http://api.tech.com/item/125345 112
 http://api.tech.com/item/125345 111`
 
 	newLineIndex := FindOffsetAfterNewLine([]byte(str), len(str))
-	assert.Equal(t, int64(34), newLineIndex)
+	assert.Equal(t, int64(69), newLineIndex)
 
 	newLineIndex = FindOffsetAfterNewLine([]byte(str), 20)
 	assert.Equal(t, int64(-1), newLineIndex)

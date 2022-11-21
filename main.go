@@ -5,6 +5,7 @@ import (
 	"github.com/panov-andy/go-find-max/clickhouse"
 	"log"
 	"os"
+	"runtime"
 	"sync"
 )
 
@@ -13,6 +14,8 @@ func main() {
 		log.Fatal("please specify path to file")
 	}
 	filepath := os.Args[1]
+
+	fmt.Printf("AMOUNT OF CPU: %d\n", runtime.NumCPU())
 
 	endLines, err := clickhouse.FileEndLineSeekerByPath(filepath)
 	if err != nil {
@@ -29,8 +32,10 @@ func main() {
 		parser := clickhouse.NewParser(collector)
 
 		waitGroup.Add(1)
+		index := i
 		go func() {
-			err := clickhouse.FilePartialRead(filepath, endLines[i], endLines[i+1], func(bytes []byte, endOfFile bool) {
+			err := clickhouse.FilePartialRead(filepath, endLines[index], endLines[index+1], func(bytes []byte, endOfFile bool) {
+				//fmt.Printf("endFile %s, SUB: %s\n", endOfFile, string(bytes))
 				parser.SubmitChunk(bytes, len(bytes))
 				if endOfFile {
 					parser.ParseCortege()
