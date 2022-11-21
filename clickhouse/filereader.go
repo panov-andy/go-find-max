@@ -103,11 +103,12 @@ func FilePartialRead(filepath string, startPosition int64, nonInclusiveEndPositi
 		}
 		buff := make([]byte, bufferSize)
 
-		readBytes, err := file.Read(buff)
+		_, err = file.Read(buff)
 		if err != nil {
-			if readBytes == 0 && err == io.EOF {
+			if err == io.EOF {
 				endOfFile = true
 				bytesParser(buff, endOfFile)
+				return nil
 			}
 			return err
 		}

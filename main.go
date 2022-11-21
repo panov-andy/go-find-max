@@ -30,7 +30,7 @@ func main() {
 	collectors := make([]*clickhouse.Collector, 0)
 
 	for i := 0; i < len(endLines)-2; i++ {
-		collector := clickhouse.NewCollector(1)
+		collector := clickhouse.NewCollector(10)
 		collectors = append(collectors, collector)
 
 		parser := clickhouse.NewParser(collector)
@@ -61,7 +61,7 @@ func main() {
 	}
 
 	clickhouse.SortByRate(corteges)
-	//corteges = corteges[:10]
+	corteges = corteges[:10]
 	for _, cortege := range corteges {
 		fmt.Printf("%v\n", cortege)
 	}
