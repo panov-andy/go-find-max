@@ -26,8 +26,8 @@ func TestFileEndLineSeeker(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, []int64{0, 39, 76, 112, 149}, newLines)
-	for _, offset := range newLines {
+	assert.Equal(t, []int64{0, 39, 76, 112, 149, 186}, newLines)
+	for index, offset := range newLines {
 		_, err := file.Seek(offset, 0)
 		if err != nil {
 			t.Error(err)
@@ -37,6 +37,38 @@ func TestFileEndLineSeeker(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		if index == len(newLines)-2 {
+			return
+		}
 		assert.Equal(t, []byte("https://"), buff)
+	}
+}
+
+func TestFilePartialRead(t *testing.T) {
+	expected := []string{
+		"https://api.tech.com/item/121145 95666",
+		"https://api.tech.com/item/122245 350",
+		"https://api.tech.com/item/123345 25",
+		"https://api.tech.com/item/124445 231",
+		"https://api.tech.com/item/125545 111"}
+
+	fileToRead := "test_data/sample-data-5lines.txt"
+	file, err := os.Open(fileToRead)
+	if err != nil {
+		t.Error(err)
+	}
+	endLinesArr, err := FileEndLineSeeker(file, 5)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for i := 0; i < len(endLinesArr)-1; i++ {
+		err := FilePartialRead(fileToRead, endLinesArr[i], endLinesArr[i+1], func(bytes []byte, endOfFile bool) {
+			assert.Equal(t, expected[i], string(bytes))
+			assert.Equal(t, true, endOfFile)
+		})
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }

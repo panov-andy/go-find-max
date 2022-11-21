@@ -3,7 +3,18 @@ package clickhouse
 import (
 	"io"
 	"os"
+	"runtime"
 )
+
+func FileEndLineSeekerByPath(filepath string) ([]int64, error) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	return FileEndLineSeeker(file, int64(runtime.NumCPU()))
+}
 
 func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int64, error) {
 	result := make([]int64, 0)
@@ -39,6 +50,13 @@ func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int64, error) {
 		}
 	}
 
+	//hack to make it convenient
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	result = append(result, info.Size()+1)
+
 	return result, nil
 }
 
@@ -54,31 +72,40 @@ func FindOffsetAfterNewLine(readBuff []byte, readLen int) int64 {
 	return -1
 }
 
-//func FilePartialReadNewLine(filepath string, startPosition int, length int, closure func([]byte, int, bool)) error {
-//	file, err := os.Open(filepath)
-//	if err != nil {
-//		return err
-//	}
-//	defer file.Close()
-//
-//	offset := startPosition
-//
-//	for {
-//		_, err := file.Seek(0, 1)
-//		if err != nil {
-//			return err
-//		}
-//		buff := make([]byte, 8*os.Getpagesize())
-//		readBytes, err := file.Read(buff)
-//		if err != nil {
-//			if readBytes == 0 && err == io.EOF {
-//				parser.parseCortege()
-//				break
-//			}
-//			return err
-//		}
-//		parser.submitChunk(buff, readBytes)
-//	}
-//	return nil
-//
-//}
+func FilePartialRead(filepath string, startPosition int64, nonInclusiveEndPosition int64, bytesParser func([]byte, bool)) error {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	readOffset := startPosition
+
+	endOfFile := false
+
+	for !endOfFile {
+		_, err := file.Seek(readOffset, 0)
+		if err != nil {
+			return err
+		}
+
+		bufferSize := int64(8 * os.Getpagesize())
+		//assume that any read will not exceed boundaries
+		if readOffset+bufferSize >= nonInclusiveEndPosition {
+			bufferSize = nonInclusiveEndPosition - readOffset - int64(1)
+			endOfFile = true
+		}
+		buff := make([]byte, bufferSize)
+
+		readBytes, err := file.Read(buff)
+		if err != nil {
+			if readBytes == 0 && err == io.EOF {
+				endOfFile = true
+				bytesParser(buff, endOfFile)
+			}
+			return err
+		}
+		bytesParser(buff, endOfFile)
+	}
+	return nil
+}
