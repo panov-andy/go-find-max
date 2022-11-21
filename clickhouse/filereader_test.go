@@ -12,7 +12,7 @@ http://api.tech.com/item/125345 112
 http://api.tech.com/item/125345 111`
 
 	newLineIndex := FindOffsetAfterNewLine([]byte(str), len(str))
-	assert.Equal(t, int64(69), newLineIndex)
+	assert.Equal(t, int64(70), newLineIndex)
 
 	newLineIndex = FindOffsetAfterNewLine([]byte(str), 20)
 	assert.Equal(t, int64(-1), newLineIndex)

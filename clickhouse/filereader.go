@@ -61,12 +61,15 @@ func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int64, error) {
 }
 
 func FindOffsetAfterNewLine(readBuff []byte, readLen int) int64 {
-	newLine := false
-	for i := 0; i < readLen; i++ {
+	wasNewLine := false
+	beforeNewLineIndex := -1
+	for i := readLen - 1; i >= 0; i-- {
 		if readBuff[i] == '\n' || readBuff[i] == '\r' {
-			newLine = true
-		} else if newLine {
-			return int64(i)
+			wasNewLine = true
+		} else if wasNewLine {
+			return int64(beforeNewLineIndex)
+		} else {
+			beforeNewLineIndex = i
 		}
 	}
 	return -1
