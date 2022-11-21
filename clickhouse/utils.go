@@ -21,12 +21,12 @@ func ReadFile(filepath string, parser *Parser) error {
 		readBytes, err := file.Read(buff)
 		if err != nil {
 			if readBytes == 0 && err == io.EOF {
-				parser.parseCortege()
+				parser.ParseCortege()
 				break
 			}
 			return err
 		}
-		parser.submitChunk(buff, readBytes)
+		parser.SubmitChunk(buff, readBytes)
 	}
 	return nil
 }

@@ -7,7 +7,7 @@ type Cortege struct {
 	Rate int
 }
 
-func sortByRate(corteges []Cortege) {
+func SortByRate(corteges []Cortege) {
 	sort.SliceStable(corteges, func(i, j int) bool {
 		return corteges[i].Rate > corteges[j].Rate
 	})

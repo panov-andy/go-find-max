@@ -33,7 +33,7 @@ type Parser struct {
 	Wg sync.WaitGroup
 }
 
-func (p *Parser) submitChunk(bytes []byte, readBytes int) {
+func (p *Parser) SubmitChunk(bytes []byte, readBytes int) {
 	for i := 0; i < readBytes; i++ {
 		if bytes[i] == ' ' {
 			p.target = &p.number
@@ -41,7 +41,7 @@ func (p *Parser) submitChunk(bytes []byte, readBytes int) {
 			p.newLine = true
 		} else {
 			if p.newLine {
-				p.parseCortege()
+				p.ParseCortege()
 
 				p.target = &p.url
 				p.url.Truncate(0)
@@ -54,7 +54,7 @@ func (p *Parser) submitChunk(bytes []byte, readBytes int) {
 	}
 }
 
-func (p *Parser) parseCortege() {
+func (p *Parser) ParseCortege() {
 	if p.number.Len() == 0 {
 		panic("empty number for url:" + p.url.String())
 	}

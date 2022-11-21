@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/panov-andy/go-find-max/clickhouse"
 	"log"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -12,24 +14,46 @@ func main() {
 	}
 	filepath := os.Args[1]
 
-	//fileInfo, err := os.Stat(filepath)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//size := fileInfo.Size()
-	//runtime.NumCPU()
-	collector := clickhouse.NewCollector(10)
-	parser := clickhouse.NewParser(collector)
-
-	err := clickhouse.ReadFile(filepath, parser)
+	endLines, err := clickhouse.FileEndLineSeekerByPath(filepath)
 	if err != nil {
 		panic(err)
 	}
 
-	parser.Wg.Wait()
+	waitGroup := sync.WaitGroup{}
+	collectors := make([]*clickhouse.Collector, 0)
 
-	for _, cort := range collector.GetResult() {
-		log.Println(cort.Url)
+	for i := 0; i < len(endLines)-2; i++ {
+		collector := clickhouse.NewCollector(1)
+		collectors = append(collectors, collector)
+
+		parser := clickhouse.NewParser(collector)
+
+		waitGroup.Add(1)
+		go func() {
+			err := clickhouse.FilePartialRead(filepath, endLines[i], endLines[i+1], func(bytes []byte, endOfFile bool) {
+				parser.SubmitChunk(bytes, len(bytes))
+				if endOfFile {
+					parser.ParseCortege()
+					waitGroup.Done()
+				}
+			})
+			if err != nil {
+				panic(err)
+			}
+		}()
+	}
+	waitGroup.Wait()
+
+	corteges := make([]clickhouse.Cortege, 0)
+	for _, collector := range collectors {
+		for _, cortege := range collector.GetResult() {
+			corteges = append(corteges, cortege)
+		}
 	}
 
+	clickhouse.SortByRate(corteges)
+	corteges = corteges[:10]
+	for _, cortege := range corteges {
+		fmt.Printf("%v\n", cortege)
+	}
 }

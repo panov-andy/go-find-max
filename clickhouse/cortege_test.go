@@ -14,7 +14,7 @@ func Test_sortByRate(t *testing.T) {
 		{Url: "http://api.tech.com/item/125345", Rate: 111},
 	}
 
-	sortByRate(c)
+	SortByRate(c)
 
 	assert.Equal(t, "http://api.tech.com/item/122345", c[0].Url)
 	assert.Equal(t, "http://api.tech.com/item/124345", c[1].Url)
