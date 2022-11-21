@@ -1,6 +1,7 @@
 package clickhouse
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -43,7 +44,7 @@ func FileEndLineSeeker(file *os.File, desiredChunks int64) ([]int64, error) {
 
 		offsetAfterNewLine := FindOffsetAfterNewLine(readBuff, readLen)
 		if offsetAfterNewLine != -1 {
-			currentFileOffset += offsetAfterNewLine
+			currentFileOffset = currentFileOffset + offsetAfterNewLine + chunkSize
 			result = append(result, currentFileOffset)
 		} else {
 			currentFileOffset += int64(readLen)
@@ -76,6 +77,7 @@ func FindOffsetAfterNewLine(readBuff []byte, readLen int) int64 {
 }
 
 func FilePartialRead(filepath string, startPosition int64, nonInclusiveEndPosition int64, bytesParser func([]byte, bool)) error {
+	fmt.Printf("OPEN FILE: %s\n", filepath)
 	file, err := os.Open(filepath)
 	if err != nil {
 		return err
@@ -92,7 +94,8 @@ func FilePartialRead(filepath string, startPosition int64, nonInclusiveEndPositi
 			return err
 		}
 
-		bufferSize := int64(8 * os.Getpagesize())
+		pageSize := 8 * os.Getpagesize()
+		bufferSize := int64(pageSize)
 		//assume that any read will not exceed boundaries
 		if readOffset+bufferSize >= nonInclusiveEndPosition {
 			bufferSize = nonInclusiveEndPosition - readOffset - int64(1)
@@ -108,6 +111,7 @@ func FilePartialRead(filepath string, startPosition int64, nonInclusiveEndPositi
 			}
 			return err
 		}
+		readOffset += int64(len(buff))
 		bytesParser(buff, endOfFile)
 	}
 	return nil

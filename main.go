@@ -21,6 +21,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("IN TOTAL %d CHUNKS EXPECTED\n", len(endLines))
+	if len(endLines) > 15 {
+		panic("too many chunks")
+	}
 
 	waitGroup := sync.WaitGroup{}
 	collectors := make([]*clickhouse.Collector, 0)
@@ -57,7 +61,7 @@ func main() {
 	}
 
 	clickhouse.SortByRate(corteges)
-	corteges = corteges[:10]
+	//corteges = corteges[:10]
 	for _, cortege := range corteges {
 		fmt.Printf("%v\n", cortege)
 	}

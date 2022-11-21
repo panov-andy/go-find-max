@@ -55,8 +55,9 @@ func (p *Parser) SubmitChunk(bytes []byte, readBytes int) {
 }
 
 func (p *Parser) ParseCortege() {
-	if p.number.Len() == 0 {
-		panic("empty number for url:" + p.url.String())
+	if p.number.Len() == 0 || p.url.Len() == 0 {
+		return
+		//panic("empty number for url:" + p.url.String())
 	}
 	value, err := strconv.Atoi(p.number.String())
 	if err != nil {
